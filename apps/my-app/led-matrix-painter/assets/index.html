@@ -1,0 +1,55 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>LED Matrix Painter</title>
+  <link rel="icon" type="image/png" href="./img/favicon.png"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    .header { display:flex; align-items:center; gap:12px; margin-bottom: 12px; }
+    .arduino-logo { height: 32px; }
+    .panel { display:flex; gap:10px; align-items:center; margin-bottom: 12px; }
+    .grid { display:grid; gap:6px; }
+    .cell {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid #ccc;
+      background: #606060; cursor: pointer;
+    }
+    .cell.on { background: #3574fd; }
+    button { padding: 6px 10px; border-radius: 6px; border: 1px solid #888; background:#f5f5f5; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="header">
+
+<!-- place inside <body> after your header/panel -->
+<div style="display:grid; grid-template-columns: 1fr 240px; gap:16px;">
+  <!-- LEFT: matrix grid -->
+  <div>
+    <div class="panel">
+      <button id="clearBtn">Clear</button>
+      <button id="fillBtn">Fill</button>
+      <span id="status"></span>
+    </div>
+    <div id="grid" class="grid" style="display:grid; grid-template-columns: repeat(13, 28px); gap:6px;"></div>
+  </div>
+
+  <!-- RIGHT: icons -->
+  <aside>
+    <h3 style="margin:6px 0">Icons</h3>
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <input id="iconName" placeholder="Icon name" style="flex:1; padding:6px;" />
+      <button id="saveIconBtn">Save</button>
+    </div>
+    <div id="iconsList" style="display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow:auto;"></div>
+  </aside>
+</div>
+
+<script src="libs/socket.io.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

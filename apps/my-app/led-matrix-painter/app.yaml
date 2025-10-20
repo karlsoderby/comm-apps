@@ -1,0 +1,6 @@
+name: LED Matrix Painter
+icon: 🖌️
+description: Draw icons in the browser and display them on the LED matrix.
+
+bricks:
+  - arduino:web_ui
