@@ -1,0 +1,61 @@
+name: Bundle apps to Release
+
+on:
+  push:
+    branches: [ main ]     # add more branches if you want
+    paths:
+      - "apps/**"
+      - ".github/workflows/bundle-apps.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build per-app archives
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME:-${GITHUB_REF##*/}}"
+          OUTDIR="dist"
+          mkdir -p "$OUTDIR"
+
+          # Build archives + checksums and create apps-index.json
+          printf '[' > "$OUTDIR/apps-index.json"
+          first=1
+
+          for d in apps/*; do
+            [ -d "$d" ] || continue
+            app="$(basename "$d")"
+            archive="${app}-${TAG}.tar.gz"
+
+            # Pack the app folder
+            tar -C "$d" -czf "$OUTDIR/$archive" .
+
+            # Checksum
+            (cd "$OUTDIR" && sha256sum "$archive" > "${archive}.sha256")
+
+            # Index entry (comma-separate)
+            if [ $first -eq 0 ]; then printf ',' >> "$OUTDIR/apps-index.json"; else first=0; fi
+            printf '{"name":"%s","archive":"%s","checksum":"%s.sha256","version":"%s"}' \
+              "$app" "$archive" "$archive" "$TAG" >> "$OUTDIR/apps-index.json"
+          done
+
+          printf ']\n' >> "$OUTDIR/apps-index.json"
+
+          echo "outdir=$OUTDIR" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ steps.build.outputs.outdir }}/*
